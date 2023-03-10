@@ -9,6 +9,7 @@ Based on BIC score we identified that the optimal number of clusters was four. I
 
 Employing a Gaussian Mixture Model on features derived from time series LV strain curves we identified clinically meaningful clusters which could provide important prognostic information over the peak LV strain. 
 
+  ![alt text](https://github.com/HCVE/LV_strain_clustering/blob/main/Images/LV%20Computational%20Pipeline.png?raw=true) 
 
 # Model Configuration
 n_components = 4 (number of clusters)  
