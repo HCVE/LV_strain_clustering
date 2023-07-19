@@ -15,7 +15,7 @@ SI_EPOGH_TRAINING.ipynb
 ### To install the required packages run "pip install -r requirements.txt". 
 
 Some of the major libraries are:   
-scikit-learn==1.3.0 
-scipy==1.11.1 
-matplotlib==3.7.2 
-pandas==2.0.3 
+scikit-learn==1.3.0  
+scipy==1.11.1  
+matplotlib==3.7.2  
+pandas==2.0.3  
