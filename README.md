@@ -1,6 +1,6 @@
 # Feature-based clustering of the left ventricular strain curve for risk stratification in general population. 
 
-# Model Configuration
+# Gaussian Mixture Model Configuration
 n_components = 4 (number of clusters)  
 n_init = 30  
 random_state = 0  
