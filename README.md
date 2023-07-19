@@ -16,6 +16,6 @@ SI_EPOGH_TRAINING.ipynb
 
 Some of the major libraries are:   
 scikit-learn==1.3.0 
-scipy==1.11.1  
+scipy==1.11.1 
 matplotlib==3.7.2 
-pandas==2.0.3
+pandas==2.0.3 
