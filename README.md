@@ -1,4 +1,4 @@
-# Feature-based clustering of left ventricular strain curve for risk stratification in general population. 
+# Feature-based clustering of the left ventricular strain curve for risk stratification in general population. 
 
 # Model Configuration
 n_components = 4 (number of clusters)  
