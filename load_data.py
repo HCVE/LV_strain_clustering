@@ -23,7 +23,7 @@ def read_info(path):
 
 
 # Read the .xlsx files (if available) which annotate the aortic valve closure times for each patient,
-# as recorded from echopath.
+# as recorded from EchoPAC.
 def read_avc_time(path, files):
     filenames = [os.path.join(path, file) for file in files]
     df = pd.DataFrame()
@@ -41,7 +41,7 @@ def read_avc_time(path, files):
 
 
 # Read the .xlsx file (if available) which annotate the duration of the PQ complex
-# and the duration of P wave, as recorded from echopath.
+# and the duration of P wave, as recorded from EchoPAC.
 # They are used to correctly assign the start and the peak of the P-wave in ECGs with noise or poor quality.
 def read_p_wave_data(path, files):
     filenames = [os.path.join(path, file) for file in files]
@@ -68,3 +68,8 @@ def read_data(path):
         filtered_data.append(d[:][:, start_index[0]:end_index[0] + 1])
 
     return data, filtered_data, patient_id, interval
+
+
+if __name__ == "__main__":
+    path = os.path.join("Data/FLEMENGHO/Strain curves (Filtered)")
+    read_data(path)

@@ -9,9 +9,8 @@ import plotly.graph_objs as go
 from sklearn.decomposition import PCA
 
 
-# create a list of numpy arrays. Each numpy array contains the ids of the patients that are assigned to the cluster
-# indicated by the position in the list
 def analyze_patient(label, patient):
+    """Helper function to create nested list for each cluster with the patient ID assigned in each cluster"""
     ids = [None] * len(np.unique(label))
     patient = np.array(patient)
     for i in range(len(np.unique(label))):
@@ -19,8 +18,8 @@ def analyze_patient(label, patient):
     return ids
 
 
-# write the clustering results to an Excel file
 def write2excel(label, patient, path, cluster_labels):
+    """Helper function to create an .xlsx file with the clustering assignments and the patient IDs"""
     workbook = xlsxwriter.Workbook(os.path.join(path, 'Clustering_assignments.xlsx'))
     worksheet = workbook.add_worksheet()
     worksheet.write(0, 0, 'Patient ID')
@@ -31,8 +30,9 @@ def write2excel(label, patient, path, cluster_labels):
     workbook.close()
 
 
-# function to exclude patients as defined by the user
 def exclude_patients(discarded_patients1, discarded_patients2, whole_data, cut_data, patient_names, time_interval):
+    """Helper function to delete patients that should not be included in the dataset. This information is annotated in
+    excel files with Aortic Valve Closure and p-wave times. Empty information could be provided."""
     # delete the data for the excluded patient
     deleted_patients = np.unique(np.concatenate((discarded_patients1, discarded_patients2)))
     deleted_patients = list(map(str, deleted_patients))
@@ -53,9 +53,9 @@ def exclude_patients(discarded_patients1, discarded_patients2, whole_data, cut_d
     return whole_data, cut_data, patient_names, time_interval
 
 
-# function to align all strain traces with respect to one template. The template can be defined by the user, or it is
-# automatically selected as the first id in the dataset
 def get_aligned_signals(extracted_data, select_point, interval, patient_id, reference_id, avc_times, p_wave_times):
+    """Helper function that performs the temporal alignment. "Reference id" is the patient used as the reference
+    template for the alignment"""
     # normalize the ECG signals
     norm_original_data = extracted_data
     for i in range(len(extracted_data)):
@@ -110,9 +110,9 @@ def get_aligned_signals(extracted_data, select_point, interval, patient_id, refe
     return interp_ecg, interp_deformation_curve, index, norm_time, interp_time
 
 
-# plot the derivative of the LV strain traces. The derivative is used to approximate the LV strain rate.
-# It produces figures in .png, .svg format using matplotlib and .html using plotly library
 def plot_gradients(fit_data, interp_time, clustering_results, ids, patient_id, path, cluster_labels, cluster_colours):
+    font = {'family': 'arial', 'weight': 'normal', 'size': 18}
+    plt.rc('font', **font)
     fig1, ax1 = plt.subplots(figsize=[8, 8])
     fig2, ax2 = plt.subplots(figsize=[8, 8])
     plot_data = []
@@ -139,7 +139,7 @@ def plot_gradients(fit_data, interp_time, clustering_results, ids, patient_id, p
                  cluster_colours[c], alpha=0.8, label="Cluster " + str(cluster_labels[c]))
 
     ax1.set_xlabel("Time (% Cycle)")
-    ax1.set_ylabel("LV Strain Rate")
+    ax1.set_ylabel("LA Strain Rate")
     legend_without_duplicate_labels(ax1)
     fig1.savefig(os.path.join(path, "Gradient.png"))
     fig1.savefig(os.path.join(path, "Gradient.svg"))
@@ -147,22 +147,21 @@ def plot_gradients(fit_data, interp_time, clustering_results, ids, patient_id, p
     plt.close(fig1)
 
     ax2.set_xlabel("Time (% Cycle)")
-    ax2.set_ylabel("LV Strain Rate")
-    ax2.set_title("Centroids of LV Strain Gradients")
+    ax2.set_ylabel("LA Strain Rate")
+    ax2.set_title("Centroids of LA Strain Gradients")
     ax2.legend()
     fig2.savefig(os.path.join(path, "Gradient Centroids.png"))
     fig2.savefig(os.path.join(path, "Gradient Centroids.svg"))
     fig2.show()
     plt.close(fig2)
 
-    layout = go.Layout(title="Gradient Analysis of LV Strain", hovermode='closest',
+    layout = go.Layout(title="Gradient Analysis of LA Strain", hovermode='closest',
                        xaxis=dict(title='Time (% of Cycle)'),
-                       yaxis=dict(title='LV Strain Rate'), font=dict(size=25))
+                       yaxis=dict(title='LA Strain Rate'), font=dict(size=25))
     fig = dict(data=plot_data, layout=layout)
     plotly.offline.plot(fig, filename=os.path.join(path, 'Gradient.html'))
 
 
-# function to fic the lenend in the figures
 def legend_without_duplicate_labels(ax):
     handles, labels = ax.get_legend_handles_labels()
     unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
@@ -170,16 +169,16 @@ def legend_without_duplicate_labels(ax):
     ax.legend(*zip(*legend_attributes))
 
 
-# plots the clustering results in .png, .svg and .html format. It produces figures with the individuals strain traces
-# assigned in each cluster and one figure with the centroids only separately.
-# The user should explicitly define the labels and the colours of the clusters
 def visualize_clustering_results(interp_time, curve, ids, clustering_results, patient_id, centers, path, cluster_labels,
                                  cluster_colours):
+    font = {'family': 'arial', 'weight': 'normal', 'size': 18}
+    plt.rc('font', **font)
     min_y_value = np.min(curve)
     max_y_value = np.max(curve)
 
     for c in range(len(np.unique(clustering_results))):
         plt.figure(figsize=[8, 8])
+        plt.rc('font', **font)
         plot_data = []
         for j in ids[c]:
             indice = patient_id.index(j)
@@ -206,7 +205,7 @@ def visualize_clustering_results(interp_time, curve, ids, clustering_results, pa
                            yaxis=dict(title='Strain (%)', range=[min_y_value - 1, max_y_value + 1]),
                            font=dict(size=25))
         fig = dict(data=plot_data, layout=layout)
-        plotly.offline.plot(fig, filename=os.path.join(path, 'Groupings of Cluster '+str(cluster_labels[c])+'.html'))
+        plotly.offline.plot(fig, filename=os.path.join(path, 'Groupings of Cluster ' + str(cluster_labels[c]) + '.html'))
 
     fig, ax = plt.subplots(figsize=[8, 8])
     ax.set_title('Cluster Centroids')
@@ -215,7 +214,6 @@ def visualize_clustering_results(interp_time, curve, ids, clustering_results, pa
                 linewidth=3)
     ax.set_xlabel('Time (% of Cycle)')
     ax.set_ylabel('Strain (%)')
-    # ax.grid()
 
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
@@ -228,7 +226,6 @@ def visualize_clustering_results(interp_time, curve, ids, clustering_results, pa
     plt.close()
 
 
-# calculate the centroids of the time series LV strain curves by averaging the clustered curves.
 def produce_centroids(predictions, fit_data):
     centers = []
     for i in np.unique(predictions):
@@ -237,8 +234,6 @@ def produce_centroids(predictions, fit_data):
     return centers
 
 
-# visualize the first 3 components of PCA and colour it based on the clustering results.
-# It produces figures in .png, .svg and .html format.
 def plot_pca(clustering_results, fitted_data, pat_id, path, cluster_labels, cluster_colours):
     pca = PCA(n_components=3)
     pca_components = pca.fit_transform(fitted_data)
@@ -248,7 +243,6 @@ def plot_pca(clustering_results, fitted_data, pat_id, path, cluster_labels, clus
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     for i in range(len(np.unique(clustering_results))):
-        # ind = clustering_results.loc[clustering_results['Cluster'] == i + 1].index
         ind = np.where(clustering_results == i)[0]
         trace = go.Scatter3d(x=pca_components[ind, 0], y=pca_components[ind, 1], z=pca_components[ind, 2],
                              mode='markers', opacity=0.45, marker=dict(color=cluster_colours[i]),
@@ -265,7 +259,7 @@ def plot_pca(clustering_results, fitted_data, pat_id, path, cluster_labels, clus
     ax.set_xlabel("1st PC")
     ax.set_ylabel("2nd PC")
     ax.set_zlabel("3rd PC")
-    ax.set_title("Principal Component Analysis of k-medoids clusters")
+    ax.set_title("Principal Component Analysis by clusters")
 
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
